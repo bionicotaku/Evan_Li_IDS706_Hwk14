@@ -43,5 +43,6 @@ if __name__ == "__main__":
     with redirect_stdout(captured_output):
         main()
     output = captured_output.getvalue()
-
+    print(output)
     generate_markdown.generate_markdown(output)
+    print("Markdown file generated successfully.")

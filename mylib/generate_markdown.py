@@ -22,5 +22,5 @@ def generate_markdown(output):
         )
 
     # Write markdown content to file
-    with open("analysis_results.md", "w") as md_file:
+    with open("output/analysis_results.md", "w") as md_file:
         md_file.write(markdown_content)
