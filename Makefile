@@ -26,10 +26,10 @@ push:
 	
 all: install format test lint run
 
+# -t: tag
 docker-build:
 	docker build -t data-analysis .
 
-# -it: interactive terminal
 # -v $(PWD):/app: mount the current directory to the container
 docker-run:
-	docker run -it -v $(PWD):/app data-analysis
+	docker run -v $(PWD):/app data-analysis
