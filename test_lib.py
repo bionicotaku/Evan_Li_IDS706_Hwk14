@@ -1,84 +1,91 @@
 import pytest
+import polars as pl
+import matplotlib.pyplot as plt
 from mylib.calculate_stat import (
     read_data,
+    plot_salary_distribution,
+    plot_job_title_distribution,
+    plot_experience_level_distribution,
+    plot_average_salary_by_job,
+    plot_salary_vs_experience,
     calculate_salary_stats_by_experience,
 )
-from pyspark.sql import SparkSession, DataFrame
 
 
-@pytest.fixture(scope="session")
-def spark():
-    return (
-        SparkSession.builder.appName("TestSalaryAnalysis")
-        .master("local[*]")
-        .getOrCreate()
-    )
-
-
+# Sample data for testing
 @pytest.fixture
-def sample_data(spark):
-    return spark.createDataFrame(
-        [
-            (2020, "EN", "Data Analyst", 50000, 0, "S"),
-            (2021, "MI", "Software Engineer", 75000, 50, "M"),
-            (2022, "SE", "Data Scientist", 100000, 100, "L"),
-            (2023, "EX", "Manager", 150000, 100, "L"),
-        ],
-        [
-            "work_year",
-            "experience_level",
-            "job_title",
-            "salary_in_usd",
-            "remote_ratio",
-            "company_size",
-        ],
+def sample_data():
+    return pl.DataFrame(
+        {
+            "work_year": [2020, 2021, 2022, 2023],
+            "experience_level": ["EN", "MI", "SE", "EX"],
+            "job_title": [
+                "Data Analyst",
+                "Software Engineer",
+                "Data Scientist",
+                "Manager",
+            ],
+            "salary_in_usd": [50000, 75000, 100000, 150000],
+            "remote_ratio": [0, 50, 100, 100],
+            "company_size": ["S", "M", "L", "L"],
+        }
     )
 
 
-def test_read_data(tmp_path, spark):
-    # Create test data directly as Spark DataFrame
-    test_data = spark.createDataFrame(
-        [
-            (2020, "EN", "Data Analyst", 50000, 0, "S"),
-            (2021, "MI", "Software Engineer", 75000, 50, "M"),
-        ],
-        [
-            "work_year",
-            "experience_level",
-            "job_title",
-            "salary_in_usd",
-            "remote_ratio",
-            "company_size",
-        ],
+def test_read_data(tmp_path):
+    # Create a temporary CSV file
+    df = pl.DataFrame(
+        {
+            "work_year": [2020, 2021],
+            "experience_level": ["EN", "MI"],
+            "job_title": ["Data Analyst", "Software Engineer"],
+            "salary_in_usd": [50000, 75000],
+            "remote_ratio": [0, 50],
+            "company_size": ["S", "M"],
+            "extra_column": [
+                "A",
+                "B",
+            ],  # This column should not be included in the result
+        }
     )
-
-    # Write test data to CSV
-    file_path = str(tmp_path / "test.csv")
-    test_data.write.csv(file_path, header=True, mode="overwrite")
+    file_path = tmp_path / "test.csv"
+    df.write_csv(file_path)
 
     # Test reading the data
     result = read_data(file_path)
-    assert isinstance(result, DataFrame)
-    assert set(result.columns) == {
+    assert isinstance(result, pl.DataFrame)
+    assert result.columns == [
         "work_year",
         "experience_level",
         "job_title",
         "salary_in_usd",
         "remote_ratio",
         "company_size",
-    }
+    ]
+    assert "extra_column" not in result.columns
+
+
+def test_plot_functions(sample_data, monkeypatch):
+    # Mock plt.show and plt.savefig to avoid displaying plots during tests
+    monkeypatch.setattr(plt, "show", lambda: None)
+    monkeypatch.setattr(plt, "savefig", lambda x: None)
+
+    # Test plot functions
+    plot_salary_distribution(sample_data)
+    job_title_counts = plot_job_title_distribution(sample_data)
+    experience_level_counts = plot_experience_level_distribution(sample_data)
+    plot_average_salary_by_job(sample_data)
+    plot_salary_vs_experience(sample_data)
+
+    assert isinstance(job_title_counts, pl.DataFrame)
+    assert isinstance(experience_level_counts, pl.DataFrame)
 
 
 def test_calculate_salary_stats_by_experience(sample_data):
     result = calculate_salary_stats_by_experience(sample_data)
-    assert isinstance(result, DataFrame)
-
-    # Convert to pandas for easier assertion
-    result_pd = result.toPandas()
-    assert set(result_pd["experience_level"]) == {"EN", "EX", "MI", "SE"}
-    assert all(
-        col in result_pd.columns
-        for col in ["experience_level", "mean", "median", "min", "max"]
+    assert isinstance(result, pl.DataFrame)
+    assert set(result.columns) == set(
+        ["experience_level", "count", "mean", "median", "min", "max"]
     )
 
 
