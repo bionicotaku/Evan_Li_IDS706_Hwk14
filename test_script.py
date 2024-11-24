@@ -23,7 +23,7 @@ class TestMain(unittest.TestCase):
         self.assertIn("Salary Statistics by Experience Level:", output)
 
         # check if the markdown file exists
-        markdown_file = "analysis_results.md"
+        markdown_file = "output/analysis_results.md"
         self.assertTrue(
             os.path.exists(markdown_file),
             f"Markdown file {markdown_file} was not generated.",
