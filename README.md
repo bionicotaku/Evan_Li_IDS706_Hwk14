@@ -1,6 +1,8 @@
 # Evan_Li_IDS706_Hwk4
 
-[![CI](https://github.com/bionicotaku/Evan_Li_IDS706_Hwk4/actions/workflows/cicd.yml/badge.svg)](https://github.com/bionicotaku/Evan_Li_IDS706_Hwk4/actions/workflows/cicd.yml)
+[![CI](https://github.com/bionicotaku/Evan_Li_IDS706_Hwk14/actions/workflows/cicd.yml/badge.svg)](https://github.com/bionicotaku/Evan_Li_IDS706_Hwk14/actions/workflows/cicd.yml)
+
+https://hub.docker.com/r/bionicotaku/ids706-hwk14
 
 ## Dataset Overview
 

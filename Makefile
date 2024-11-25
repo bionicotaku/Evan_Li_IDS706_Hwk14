@@ -28,8 +28,8 @@ all: install format test lint run
 
 # -t: tag
 docker-build:
-	docker build -t data-analysis .
+	docker build -t bionicotaku/ids706-hwk14 .
 
 # -v $(PWD):/app: mount the current directory to the container
 docker-run:
-	docker run -v $(PWD):/app data-analysis
+	docker run -v $(PWD):/app bionicotaku/ids706-hwk14
